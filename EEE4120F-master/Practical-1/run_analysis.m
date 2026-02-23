@@ -6,7 +6,7 @@
 %
 % MEMBERS:
 %   - Member 1 Rasekoai Mokose, MKSRAS001
-%   - Member 2 Name, Student Number
+%   - Member 2 Adedamola Yusuff, YSFADE001
 
 
 %% ========================================================================
