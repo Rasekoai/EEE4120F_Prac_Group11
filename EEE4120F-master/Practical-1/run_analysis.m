@@ -18,6 +18,9 @@
 % TODO:
 %***************************************************************************************
 % padding the image with zeroes before processing
+% TODO: 
+% a.	padding the image with zeroes before processing
+
 %============================================================
 %function padded_image = ZeroPad(image, pad)
 %	[rows,cols] = size (image)	% extracting the dimensions of the image
@@ -29,8 +32,8 @@
 % Implement manual 2D convolution using Sobel Operator(Gx and Gy)
 % output - Convolved image result (grayscale)
 %========================================================================
-function output = my_conv2(varargin) %Add necessary input arguments
-
+function processed_image = my_conv2(image, Gx, Gy)
+    
 end
 
 %% ========================================================================
