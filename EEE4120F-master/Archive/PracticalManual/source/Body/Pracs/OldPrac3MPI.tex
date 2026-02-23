@@ -1,0 +1,97 @@
+\section{Prac 3 - MPI}
+\label{sec:Prac3}
+\subsection{Overview}
+The focus of this practical is message-passing in a distributed memory programming model. The processing algorithm is a median filter will be used. You can find a tutorial at \href{https://computing.llnl.gov/tutorials/mpi/}{https://computing.llnl.gov/tutorials/mpi/}, but this is much more detailed that what you need for this practical.
+
+\subsection{The Programming Model}
+One thing to keep in mind is that each process runs in a completely separate memory-space.
+There are no shared memory structures, so any global memory you define is local to each
+instance. The only means of sharing data is through sending and receiving messages.
+Typically MPI is only useful on distributed systems (systems where each node has its own
+memory, and the nodes are connected through some form of network – typically Ethernet).
+Setting up such a system is not trivial, and therefore not included in this practical. For this
+practical, all the processes will be running on the same CPU, with memory being separated
+by means of memory virtualisation (through use of the \href{https://en.wikipedia.org/wiki/Memory_management_unit}{memory management unit}).
+
+\subsubsection{MPI Commands}
+MPI programs are compiled with \textbf{mpic}, not gcc, and run with \textbf{mpirun}, not by calling the program binary directly. The makefile associated with this practical runs the program with 5 instances (one master and 4 slaves). Feel free to change this if you so wish. 
+
+Study the source code provided. It has been adapted from \href{https://en.wikipedia.org/wiki/Message_Passing_Interface#Example_program}{this example} and uses simple blocking communication. You can implement this practical by means of blocking communication, so you don’t need any more commands than those in the example code. 
+
+If you feel like being fancy, have a look at the \href{https://mpi.deino.net/mpi_functions/MPI_Iprobe.html}{MPI Iprobe} command. 
+
+You can also have a look at \href{http://stackoverflow.com/questions/12637550/using-mpibyte-to-receive-any-data-type}{this link} to see how to tag your messages. Tags are typically used to determine the message type before actually receiving it, but it could be used for many other things as well. 
+
+There are many MPI datatypes, but for the purpose of this practical you can get away with using bytes (MPI BYTE) exclusively.
+
+\subsubsection{Using Doxygen}
+
+This practice include examples showing the use of Doxygen comments. While the purpose of this prac is not to learn Doxygen, I put that in as an example showing how this very useful code documentation framework can be used. Hence, the bonus learning for this prac is getting some insight into what coding that uses Doxygen looks like.
+
+You are of course most welcome to try out use of Doxygen, and addition of Doxygen formatted comments while you are working on this prac. Note that you do not need to have Doxygen installed to compile and run this prac - that is just optional extras. 
+If you do want to install Doxygen and see what the produced documentation looks like, than on Linux you can simply do an "apt-get" installation of Doxygen (if you haven't got it already installed) and to generate the documentation for this prac run the command make doxy. Note that by default, when you just run make on its own, it will not update the Doxygen documentation folder. The generated documentation will be in the folder Prac3\\doxy\\html (it should also update a Latex version of the documentation that is in Prac3\\doxy\\latex, but to generate the pdf from these Latex files you need to manually go into this sub-directory and run make).
+
+You can find info about Doxygen and the comment types and formatting procedures at \href{https://www.doxygen.nl/index.html}{Doxygen Manual} command. You might want to consider using Doxygen in the course project.
+
+\subsection{Problems}
+
+The file Prac3.cpp provides boilerplate code for an MPI application that incorporates the following operations:
+
+\begin{enumerate}
+	\item Libraries you need to include.
+	\item Use of jpeglib to load a JPEG file that will be split up for processing.
+	\item Putting together a Master process (i.e., which will be called by the MPI process with rank 0) and a Slave process (called by MPI processes with rank 1 and above).
+	\item Reading and writing of a JPEG file (done by the Master).
+	\item Sending messages with data between Master and Slaves, and from Slaves to Master.
+	\item Showing that you can use printf from any node that sends the displayed text back to the Master (a useful hint for getting performance information!). 
+\end{enumerate}
+
+It is up to you though to decide how to partition up and distribute the data between nodes for processing (you want to mention your decision and reasoning for these aspects in your prac report).
+
+\subsubsection{Problem Partitioning}
+Choose a memory partitioning scheme. In your report, explain your partitioning scheme and why you chose it. Do not send the entire dataset to each process, as this is a waste of data. \textbf{[5 marks for describing the partitioning]}
+
+You also need to have some means to indicate to the slave what size the data is. You can implement this any way you wish, but it is suggested that you send one message, with a known size and fixed format, that indicates data size and any other parameters you wish to send to the slave. The next message can then be the actual data to work on. \textbf{[5 marks for getting data to slaves]}
+
+When the slave is finished, it must send the result back to the master. The master must then assemble the results and save the resulting filtered image to disk. \textbf{[5 marks sending back the data and reassembling]}
+
+Provide snippets of your code in the report (it is important for your code snippets to be suitable commented, the use of comments in your main code repository is not as important for marking but is good practice). \textbf{[5 marks for code]}
+
+\subsubsection{Experimentation}
+
+Feel free to experiment with diﬀerent number of processes (you can do this easily using just one machine with a multi-core CPU and telling mpirun to use more processes using the -np ﬂag), although this is not required in 2021. Assuming you are not using a cluster, you would be limited to e.g. a single machine having 4 cores; in such a case you would clearly not be able to get performance improvements using beyond 4 processors because it would have to multitask the processes, but this can still be useful for testing the robustness of your coding handing cases beyond the number of physical cores you have available.
+
+Feel free to experiment with different number of processes, although this is not required. It is sufficient to simply get it working. \textbf{[5 marks for experiments]}
+
+Your report should comment on the time performance though, so make sure you take time measurements. \textbf{[5 marks graphs and display of results]}
+
+\subsection{Submission}
+
+Compile your experiments and findings into an IEEE-style conference paper. 
+The page limit is 3 pages. Submit your paper to the Vula Assignment for this practical.
+
+\subsection{Marking}
+Note that 33 marks are available, but you cannot score more than a total of 100\%.
+\begin{table}[H]
+\centering
+\caption{Prac 3 Marking Guide}
+\label{tbl:Prac3Marks}
+\begin{tabular}{|l|l|r|}
+\hline
+\textbf{Aspect} & \textbf{Description} & \multicolumn{1}{l|}{\textbf{Mark Allocation}} \\ \hline
+Partitioning & Listing (show data split) & 2 \\ \hline
+ & Explanation & 3 \\ \hline
+To Slaves & Listing \& ACK & 2 \\ \hline
+ & Explanation & 3 \\ \hline
+On/From Slaves & Listing & 3 \\ \hline
+Reassembling & Explanation & 2 \\ \hline
+Code & Comments & 2 \\ \hline
+ & Use of MPI principles & 3 \\ \hline
+Experiments & Experiment & 3 \\ \hline
+ & Good practice & 2 \\ \hline
+Results & Graph/Table & 2 \\ \hline
+ & Discussion & 3 \\ \hline
+Bonus &  & 3 \\ \hline
+\textbf{Total} &  & \textbf{30} \\ \hline
+\end{tabular}
+\end{table}
