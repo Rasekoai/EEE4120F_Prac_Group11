@@ -32,19 +32,29 @@
 % Implement manual 2D convolution using Sobel Operator(Gx and Gy)
 % output - Convolved image result (grayscale)
 %========================================================================
-function number 
 
 function processed_image = my_conv2(image, Gx, Gy)
     processed_image = zeros(size(image)-2)
     num_rows = height(processed_image)
     num_columns = width(processed_image)
-    for c = 1:num_columns
-        for r = 1:num_rows
-            current_image_pixel_row = r+1
-            current_image_pixel_column = c+1 
-            % Do Mx
-            image()
+    for r = 1:num_columns
+        for c = 1:num_rows
+            image_pixel_row = r+1
+            image_pixel_column = c+1 
             
+            totalGx=0
+            totalGy=0
+            for rG = 1:3
+                for cG = 1:3
+                    totalGx = Gx(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGx
+                    totalGy = Gx(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGy
+                end
+            end
+
+            processed_image(r,c) = abs(totalGx) + abs(totalGy)
+        
+        end
+    end
 end
 
 %% ========================================================================
