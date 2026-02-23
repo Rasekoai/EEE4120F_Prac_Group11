@@ -33,29 +33,64 @@
 % output - Convolved image result (grayscale)
 %========================================================================
 
+% Gx and Gy are for testing purposes
+Gx = [-1 0 1; -2 0 2; -1 0 1]
+Gy = [1 2 1; 0 0 0; -1 -2 -1]
+
+% An image for testing purposes
+test_image = [2 5 3 6 3; 5 7 2 6 8; 1 2 3 4 5; 6 7 8 9 1; 2 3 4 5 6; 7 8 9 1 2; 3 4 5 6 7; 8 9 1 2 3]
+
+% Convolution Function
 function processed_image = my_conv2(image, Gx, Gy)
+
+    % No padding on processed image so processed image is smaller than original by 1 pixel "frame"
     processed_image = zeros(size(image)-2)
+    
+    % Get the dimensions of the processed image (we know this before we start convolving
+    % depending on the type of padding that we choose beforehand)
     num_rows = height(processed_image)
     num_columns = width(processed_image)
-    for r = 1:num_columns
-        for c = 1:num_rows
-            image_pixel_row = r+1
-            image_pixel_column = c+1 
+    
+    % Convolution of both Gx and Gy as well as summation of magnitudes is
+    % done in this for-loop
+    
+    for r = 1:num_rows                  % Pixel row position on processed image
+        for c = 1:num_columns           % Pixel column position of processed image
+            image_pixel_row = r+1       % "Same pixel" but its row position on the original image
+            image_pixel_column = c+1    % "Same pixel" but its column position on the original image
             
             totalGx=0
             totalGy=0
-            for rG = 1:3
-                for cG = 1:3
-                    totalGx = Gx(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGx
-                    totalGy = Gx(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGy
+
+            for rG = 1:3                % Position on Gx and Gy
+                for cG = 1:3            % Position on Gx and Gy
+                    totalGx = Gx(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGx  % Gives the horizontal gradient at the current pixel. The math here allows us to go to the adjacent squares while sequentially moving through Gx 
+                    totalGy = Gy(rG,cG)*image(image_pixel_row-2+rG,image_pixel_column-2+cG) + totalGy  % Gives the vertical gradient at the current pixel. The math here allows us to go to the adjacent squares while sequentially moving through Gy
                 end
             end
-
             processed_image(r,c) = abs(totalGx) + abs(totalGy)
-        
         end
     end
 end
+
+% Test of the for-loop convolution. It works.
+manual = my_conv2(test_image, Gx, Gy)
+
+Mx = conv2(test_image,Gx,"valid")
+My = conv2(test_image,Gy,"valid")
+
+M = zeros(size(Mx))
+
+w = width(M)
+h = height(M)
+
+for c = 1:w
+    for r = 1:h
+        M(r,c) = abs(Mx(r,c)) + abs(My(r,c));
+    end
+end
+
+show(M)  % Compared "manual" with "M" to see if the output of the manual convolution was correct. It was, indeed, correct.
 
 %% ========================================================================
 %  PART 2: Built-in 2D Convolution Implementation
