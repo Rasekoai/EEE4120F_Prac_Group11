@@ -5,7 +5,7 @@
 % GROUP NUMBER:
 %
 % MEMBERS:
-%   - Member 1 Name, Student Number
+%   - Member 1 Rasekoai Mokose, MKSRAS001
 %   - Member 2 Name, Student Number
 
 
@@ -15,8 +15,18 @@
 %
 % REQUIREMENT: You may NOT use built-in convolution functions (conv2, imfilter, etc.)
 
-% TODO: Implement manual 2D convolution using Sobel Operator(Gx and Gy)
+% TODO: 
+% a.	padding the image woth zeroes before processing
+%============================================================
+function padded_image = ZeroPad(image, pad)
+	[rows,cols] = size (image)	% extracting the dimensions of the image
+	padded_image = zeros(rows+2*pad, cols+2*pad) % create large frame filled with zeroes
+	padded_image(pad+1:rows+pad,pad+1:pad+cols) = image	% insert image into frame padded with zeroes
+end
+
+% b.	Implement manual 2D convolution using Sobel Operator(Gx and Gy)
 % output - Convolved image result (grayscale)
+%========================================================================
 function output = my_conv2(varargin) %Add necessary input arguments
 
 end
