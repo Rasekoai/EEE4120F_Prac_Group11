@@ -41,7 +41,7 @@ end
 
 % TODO: Use conv2 to perform 2D convolution
 % output - Convolved image result (grayscale)
-function output = inbuilt_conv2(image, Gx, Gy, mode) % accept image, operators and mode('same','full', 'valid')
+function output = inbuilt_conv2(image, Gx, Gy, mode) % pass image, operators and mode('same','full', 'valid')
 % cast image to double to avoid overflow
 	image = double(image) 
 
