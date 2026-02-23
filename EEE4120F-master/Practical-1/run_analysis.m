@@ -73,25 +73,6 @@ function processed_image = my_conv2(image, Gx, Gy)
     end
 end
 
-% Test of the for-loop convolution. It works.
-manual = my_conv2(test_image, Gx, Gy)
-
-Mx = conv2(test_image,Gx,"valid")
-My = conv2(test_image,Gy,"valid")
-
-M = zeros(size(Mx))
-
-w = width(M)
-h = height(M)
-
-for c = 1:w
-    for r = 1:h
-        M(r,c) = abs(Mx(r,c)) + abs(My(r,c));
-    end
-end
-
-show(M)  % Compared "manual" with "M" to see if the output of the manual convolution was correct. It was, indeed, correct.
-
 %% ========================================================================
 %  PART 2: Built-in 2D Convolution Implementation
 %  ========================================================================
@@ -100,16 +81,15 @@ show(M)  % Compared "manual" with "M" to see if the output of the manual convolu
 
 % TODO: Use conv2 to perform 2D convolution
 % output - Convolved image result (grayscale)
-function output = inbuilt_conv2(image, Gx, Gy, mode) % pass image, operators and mode('same','full', 'valid')
+function output = inbuilt_conv2(image, Gx, Gy) % pass image and operators
 % cast image to double to avoid overflow
-	image = double(image) 
 
 % applying the conv2 for the sobel kernels
-	Gx_out = conv2(image, Gx, mode);
-	Gy_out = conv2(image, Gy, mode);
+	Gx_out = conv2(image, Gx, "valid");
+	Gy_out = conv2(image, Gy, "valid");
 
 % clculating magnitude
-	output abs(Gx_out) + abs(Gy_out)
+	output =  abs(Gx_out) + abs(Gy_out)
 
 end
 
