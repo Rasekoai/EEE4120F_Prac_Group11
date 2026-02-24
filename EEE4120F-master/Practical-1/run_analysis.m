@@ -91,17 +91,54 @@ end
 function run_analysis()
 
     images = dir('sample_images/*.png');
+    num_images = length(images);
+    
+    % defining the operators inside analysis function
+    Gx = [-1 0 1; -2 0 2; -1 0 1];
+    Gy = [1 2 1; 0 0 0; -1 -2 -1];
 
+    results = table;
+    
     for i = 1:length(images)
     
         filename = fullfile(images(i).folder, images(i).name);
-        img = imread(filename);
+	     img = imread(filename);
     
         img = rgb2gray(img);
     
-        result = my_conv2(img, Gx, Gy);
+        [result1,time_manual] = my_conv2(img, Gx, Gy); 
+	[result2,time_builtin] = inbuilt_conv2(img, Gx, Gy);
+
+	     speedup = time_manual/time_builtin; % speedup = non_optimised/optimised
+	
+	   % verify correctness
+        tolerance = 1e-10;
+        if max(abs(result1(:) - result2(:))) > tolerance
+            warning('Mismatch detected in image %s', images(i).name);
+	end
+
+	% store the data
+	results.ImageName(i) = string(images(i).name);
+	results.TimeManual(i) = time_manual;
+	results.TimeBuiltin(i) = time_builtin;
+	results.Speedup(i) = speedup;
+
+	
     
     end
+    
+    % plotting the data
+    %figure;
+    %bar(results.Speedup);
+    %title('Speedup: Manual vs Built-in Convolution');
+    %xlabel('Image');
+    %ylabel('Speedup Ratio');
+    disp(results)
+    
+end
+
+run_analysis();
+
     % TODO1:
     % Load all the sample images from the 'sample_images' folder
     
@@ -118,6 +155,3 @@ function run_analysis()
     %   f. Plot and compare results
     %   g. Visualise the edge detection results(Optional)
     
-    
-    
-end
