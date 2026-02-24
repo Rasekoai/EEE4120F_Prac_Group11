@@ -97,7 +97,13 @@ function run_analysis()
     Gx = [-1 0 1; -2 0 2; -1 0 1];
     Gy = [1 2 1; 0 0 0; -1 -2 -1];
 
-    results = table;
+    results = table( ...
+    strings(num_images,1), ...
+    zeros(num_images,1), ...
+    zeros(num_images,1), ...
+    zeros(num_images,1), ...
+    false(num_images,1), ...
+    'VariableNames', {'ImageName','TimeManual','TimeBuiltin','Speedup', 'IsCorrect'});
     
     for i = 1:length(images)
     
@@ -131,13 +137,18 @@ function run_analysis()
 	
     
     end
-    
-    % plotting the data
-    %figure;
-    %bar(results.Speedup);
-    %title('Speedup: Manual vs Built-in Convolution');
-    %xlabel('Image');
-    %ylabel('Speedup Ratio');
+
+   % plotting the data
+ 
+    figure;
+    b = bar([results.TimeManual, results.TimeBuiltin]);
+    title('Execution Time: Manual vs Built-in');
+    xlabel('Image');
+    ylabel('Time (seconds)');
+    xticklabels(results.ImageName);
+    xtickangle(45);
+    legend({'Manual', 'Built-in'});
+
     disp(results)
     
 end
