@@ -63,8 +63,8 @@ end
 % output - Convolved image result (grayscale)
 function output_matrix = inbuilt_conv2(image, Gx, Gy) % pass image and operators
     % applying the conv2 for the sobel kernels
-    Gx_out = conv2(image, Gx, "valid");
-    Gy_out = conv2(image, Gy, "valid");
+	Gx_out = conv2(image, Gx, "valid");
+	Gy_out = conv2(image, Gy, "valid");
 
 	output_matrix =  abs(Gx_out) + abs(Gy_out);       % calculating magnitude
 end
