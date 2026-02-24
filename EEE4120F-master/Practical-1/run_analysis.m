@@ -73,11 +73,11 @@ end
 function [output_matrix, execution_time] = inbuilt_conv2(image, Gx, Gy) % pass image and operators
     tStart = tic;
     % applying the conv2 for the sobel kernels
-	Gx_out = conv2(image, Gx, "valid");
-	Gy_out = conv2(image, Gy, "valid");
+    Gx_out = conv2(image, Gx, "valid");
+    Gy_out = conv2(image, Gy, "valid");
 
     % calculating magnitude
-	output_matrix =  abs(Gx_out) + abs(Gy_out);
+    output_matrix =  abs(Gx_out) + abs(Gy_out);
     execution_time = toc(tStart);
 end
 
@@ -102,19 +102,22 @@ function run_analysis()
     for i = 1:length(images)
     
         filename = fullfile(images(i).folder, images(i).name);
-	     img = imread(filename);
+	img = imread(filename);
     
         img = rgb2gray(img);
     
         [result1,time_manual] = my_conv2(img, Gx, Gy); 
 	[result2,time_builtin] = inbuilt_conv2(img, Gx, Gy);
 
-	     speedup = time_manual/time_builtin; % speedup = non_optimised/optimised
+	speedup = time_manual/time_builtin; % speedup = non_optimised/optimised
 	
-	   % verify correctness
+	 % Checks if maximum pixel difference is within tolerance
         tolerance = 1e-10;
-        if max(abs(result1(:) - result2(:))) > tolerance
-            warning('Mismatch detected in image %s', images(i).name);
+	is_correct = max(abs(result1(:) - result2(:))) <= tolerance;
+
+	if ~is_correct
+    	warning('Mismatch detected in image %s', images(i).name);
+
 	end
 
 	% store the data
@@ -122,6 +125,8 @@ function run_analysis()
 	results.TimeManual(i) = time_manual;
 	results.TimeBuiltin(i) = time_builtin;
 	results.Speedup(i) = speedup;
+	results.IsCorrect(i) = is_correct;
+
 
 	
     
@@ -155,3 +160,5 @@ run_analysis();
     %   f. Plot and compare results
     %   g. Visualise the edge detection results(Optional)
     
+
+
