@@ -63,8 +63,8 @@ end
 % output - Convolved image result (grayscale)
 function output_matrix = inbuilt_conv2(image, Gx, Gy) % pass image and operators
     % applying the conv2 for the sobel kernels
-    Gx_out = conv2(image, Gx, "valid");
-    Gy_out = conv2(image, Gy, "valid");
+	Gx_out = conv2(image, Gx, "valid");
+	Gy_out = conv2(image, Gy, "valid");
 
 	output_matrix =  abs(Gx_out) + abs(Gy_out);       % calculating magnitude
 end
@@ -116,7 +116,7 @@ function run_analysis()
         filename = fullfile(images(i).folder, images(i).name);
         img = imread(filename);                                              % Converts the image into a matrix of values
         if size(img,3) == 3                                                  % Checks if the image is greyscaled or in colour
-            img = rgb2gray(img);
+            img = rgb2gray(img); 
         end
         img = double(img);                                                   % Avoids overflow if the pixel values were obtained in uint8
         fprintf('\nProcessing %s\n', images(i).name);                        % Newline, print a Processing image [current image's name] message, newline
@@ -175,7 +175,7 @@ function run_analysis()
     
     %% ---- Plot Timing ----
     figure;
-    plot(image_sizes, time_manual, '-o');
+    plot(image_sizes, time_manual, '-o', 'LineWidth', 10, '');
     hold on;
     plot(image_sizes, time_builtin, '-o');
     xlabel('Number of Pixels');

@@ -159,11 +159,11 @@ function run_analysis()
         % imshow(I, []) displays the grayscale image I, scaling the image based on the range of pixel 
         % values in I. imshow displays the minimum value in I as black and the maximum value as white
         imshow(img, []);
-        title('Original');
+        title('Original', 'FontSize', 30);
     
         subplot(1,2,2);
         imshow(manual_result, []);
-        title('Manual Sobel');
+        title('Manual Sobel', 'FontSize', 30);
     
     end
     
@@ -175,21 +175,21 @@ function run_analysis()
     
     %% ---- Plot Timing ----
     figure;
-    plot(image_sizes, time_manual, '-o');
+    plot(image_sizes, time_manual, '-o', 'LineWidth', 4, 'MarkerSize', 4);
     hold on;
-    plot(image_sizes, time_builtin, '-o');
-    xlabel('Number of Pixels');
-    ylabel('Execution Time (s)');
+    plot(image_sizes, time_builtin, '-o', 'LineWidth', 4, 'MarkerSize', 4);
+    xlabel('Number of Pixels', 'FontSize', 25);
+    ylabel('Execution Time (s)', 'FontSize', 25);
     legend('Manual','Built-in');
-    title('Execution Time Comparison');
+    title('Execution Time Comparison', 'FontSize', 30);
     grid on;
     
     %% ---- Plot Speedup ----
     figure;
-    plot(image_sizes, speedup, '-o');
-    xlabel('Number of Pixels');
-    ylabel('Speedup (T_manual / T_builtin)');
-    title('Speedup vs Image Size');
+    plot(image_sizes, speedup, '-o', 'LineWidth', 4, 'MarkerSize', 4);
+    xlabel('Number of Pixels', 'FontSize', 25);
+    ylabel('Speedup (T_{manual} / T_{builtin})', 'FontSize', 25);
+    title('Speedup vs Image Size', 'FontSize', 30);
     grid on;
 
 end
