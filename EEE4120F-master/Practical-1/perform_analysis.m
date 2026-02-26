@@ -116,7 +116,7 @@ function run_analysis()
         filename = fullfile(images(i).folder, images(i).name);
         img = imread(filename);                                              % Converts the image into a matrix of values
         if size(img,3) == 3                                                  % Checks if the image is greyscaled or in colour
-            img = rgb2gray(img);
+            img = rgb2gray(img); 
         end
         img = double(img);                                                   % Avoids overflow if the pixel values were obtained in uint8
         fprintf('\nProcessing %s\n', images(i).name);                        % Newline, print a Processing image [current image's name] message, newline
