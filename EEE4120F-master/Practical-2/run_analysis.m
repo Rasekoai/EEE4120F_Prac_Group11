@@ -5,16 +5,55 @@
 % GROUP NUMBER:
 %
 % MEMBERS:
-%   - Member 1 Name, Student Number
-%   - Member 2 Name, Student Number
+%   - Member 1 Adedamola Yusuff, YSFADE001
+%   - Member 2 Rasekoai Mokose, MKSRAS001
 
 %% ========================================================================
 %  PART 1: Mandelbrot Set Image Plotting and Saving
 %  ========================================================================
 %
 % TODO: Implement Mandelbrot set plotting and saving function
-function mandelbrot_plot(varargin) %Add necessary input arguments
-    
+   function mandelbrot_plot(varargin) %Add necessary input arguments
+%  ========================================================================
+%   PART 1: Mandelbrot Set Image Plotting and Saving
+%  ========================================================================
+% This function transforms iteration data into a colorful fractal image.
+
+function mandelbrot_plot(iter_counts, xLim, yLim, colorName, fileName) 
+
+        % 1. Create color palette (256 steps) and force the "prisoner" set to black
+        colorMap = feval(colorName, 256); 
+        colorMap(end,:) = [0,0,0]; 
+
+        % 2. Use log scale to compress data and reveal "slow escape" detail near edges
+        log_data = log(1 + iter_counts); 
+        max_val = max(log_data(:)); 
+
+        % 3. Normalize log data to a 1-256 index range to match the colorMap
+        idx = round(1 + (log_data / max_val) * 255); 
+        
+        % 4. Convert the indexed matrix into a truecolor RGB image
+        rgb_image = ind2rgb(idx, colorMap); 
+
+        % 5. Set up the figure window (hidden)
+        [H, W] = size(iter_counts); 
+        fig = figure('Visible', 'off'); 
+
+        % 6. Map the RGB pixels to the actual math coordinates (Real/Imaginary)
+        image(linspace(xLim(1), xLim(2), W), linspace(yLim(1), yLim(2), H), rgb_image);
+
+        % Formatting the plot
+        set(gca, 'YDir', 'normal'); % Flip y-axis so it isn't upside down
+        xlabel('Real (Re)'); ylabel('Imaginary (Im)');
+        title(['Mandelbrot: ', num2str(W), 'x', num2str(H)]); 
+        axis tight;
+
+        % 7. Create output folder and save the image
+        if ~exist('output', 'dir'), mkdir('output'); end
+        save_path = fullfile('output', [fileName, '.png']);
+        exportgraphics(gca, save_path, 'Resolution', 200);
+
+        close(fig); % Clean up memory by closing the hidden figure 
 end
 
 %% ========================================================================
