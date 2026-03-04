@@ -19,10 +19,10 @@
 %  ========================================================================
 % This function transforms iteration data into a colorful fractal image.
 
-function mandelbrot_plot(iter_counts, xLim, yLim, colorName, fileName) 
+function mandelbrot_plot(iter_counts,colorName, fileName) 
 
         % Create color palette (256 steps) and force the "prisoner" set to black
-        colorMap = feval(colorName, 256); 
+        colorMap = feval(colorName, 4096); 
         colorMap(end,:) = [0,0,0]; 
 
         % Use log scale to compress data and reveal "slow escape" detail near edges
@@ -30,30 +30,16 @@ function mandelbrot_plot(iter_counts, xLim, yLim, colorName, fileName)
         max_val = max(log_data(:)); 
 
         % Normalize log data to a 1-256 index range to match the colorMap
-        idx = round(1 + (log_data / max_val) * 255); 
+        idx = round(1 + (log_data / max_val) * 4095);
+	idx = max(1, min(4096, idx));
         
         % Convert the indexed matrix into a truecolor RGB image
         rgb_image = ind2rgb(idx, colorMap); 
 
-        % Set up the figure window (hidden)
-        [H, W] = size(iter_counts); 
-        fig = figure('Visible', 'off'); 
-
-        % Map the RGB pixels to the actual math coordinates (Real/Imaginary)
-        image(linspace(xLim(1), xLim(2), W), linspace(yLim(1), yLim(2), H), rgb_image);
-
-        % Formatting the plot
-        set(gca, 'YDir', 'normal'); % Flip y-axis so it isn't upside down
-        xlabel('Real (Re)'); ylabel('Imaginary (Im)');
-        title(['Mandelbrot: ', num2str(W), 'x', num2str(H)]); 
-        axis tight;
-
         % Create output folder and save the image
         if ~exist('output', 'dir'), mkdir('output'); end
-        save_path = fullfile('output', [fileName, '.png']);
-        exportgraphics(gca, save_path, 'Resolution', 200);
+	imwrite(rgb_image, fullfile('output', [fileName, '.bmp']));
 
-        close(fig); % Clean up memory by closing the hidden figure 
 end
 
 %% ========================================================================
@@ -64,17 +50,20 @@ end
 
 %function mandelbrot_serial(varargin) %Add necessary input arguments
 
-function [iter_counts] = mandelbrot_serial(W, H, max_iters, xlim, ylim)
+function [iter_counts] = mandelbrot_serial(W, H, max_iters)
     % This function calculates the Mandelbrot set for a given resolution
     % using nested for-loops (sequential processing).
 
+    X_LIM = [-2.0, 0.5];
+    Y_LIM = [-1.2, 1.2];
+
+    % Map pixels to complex plane coordinates
+    x_coords = linspace(X_LIM(1), X_LIM(2), W);
+    y_coords = linspace(Y_LIM(1), Y_LIM(2), H);
+
+
     % Initialize the results matrix
     iter_counts = zeros(H, W);
-    
-    % Mapping screen pixels to coordinates
-    x_coords = linspace(xlim(1), xlim(2), W);
-    y_coords = linspace(ylim(1), ylim(2), H);
-
     
     % NESTED FOR-LOOPS 
     for row = 1:H
