@@ -98,8 +98,46 @@ end
 %  ========================================================================
 %
 %TODO: Implement parallel Mandelbrot set computation function
-function mandelbrot_parallel(varargin) %Add necessary input arguments 
-    
+%function mandelbrot_parallel(varargin) %Add necessary input arguments
+
+function [iter_counts] = mandelbrot_parallel(W, H, max_iters)
+    % Coordinate limits
+    X_LIM = [-2.0, 0.5];
+    Y_LIM = [-1.2, 1.2];
+
+    % Map pixels to complex plane coordinates
+    x_coords = linspace(X_LIM(1), X_LIM(2), W);
+    y_coords = linspace(Y_LIM(1), Y_LIM(2), H);
+
+    % Initialise results matrix
+    iter_counts = zeros(H, W);
+
+    % Parallel computation - each row distributed across CPU cores
+    parfor row = 1:H
+        % Local row buffer 
+        row_counts = zeros(1, W);
+
+        for col = 1:W
+            c_re = x_coords(col);
+            c_im = y_coords(row);
+            z_re = 0;
+            z_im = 0;
+            count = 0;
+
+            while (count < max_iters) && (z_re^2 + z_im^2 <= 4)
+                z_re_new = z_re^2 - z_im^2 + c_re;
+                z_im     = 2 * z_re * z_im + c_im;
+                z_re     = z_re_new;
+                count    = count + 1;
+            end
+
+            row_counts(col) = count;
+        end
+
+        iter_counts(row, :) = row_counts;
+    end
+  
+
 end
 
 %% ========================================================================
