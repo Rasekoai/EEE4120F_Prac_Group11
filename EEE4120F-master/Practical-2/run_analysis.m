@@ -21,7 +21,7 @@
 
 function mandelbrot_plot(iter_counts,colorName, fileName) 
 
-        % Create color palette (256 steps) and force the "prisoner" set to black
+        % Create color palette (4096 steps) and force the "prisoner" set to black
         colorMap = feval(colorName, 4096); 
         colorMap(end,:) = [0,0,0]; 
 
@@ -174,11 +174,12 @@ function run_analysis()
 	    mandelbrot_plot(iter_counts, 'hot', sprintf('mandelbrot_seq_%dx%d', W, H));
 	    
     end
+% Benchmarking the parallel version for all the images
 
     fprintf('---Parallel version running ---\n');
     for s = 1:size(image_sizes,1)
-	    W = image_sizes,1);
-	    H = image_sizes,2);
+	    W = image_sizes(s,1);
+	    H = image_sizes,(s,2);
             fprintf('Computing %dx%d... ', W, H);
 	    tic;
 	    iter_counts = mandelbrot_parallel(W,H,max_iterations;
@@ -195,27 +196,3 @@ function run_analysis()
     
 end
 
-% the following function is for testing purposes
-
-function mandelbrot_plot(iter_counts,colorName, fileName)
-
-        % Create color palette (256 steps) and force the "prisoner" set to black
-        colorMap = feval(colorName, 4096);
-        colorMap(end,:) = [0,0,0];
-
-        % Use log scale to compress data and reveal "slow escape" detail near edges
-        log_data = log(1 + iter_counts);
-        max_val = max(log_data(:));
-
-        % Normalize log data to a 1-256 index range to match the colorMap
-        idx = round(1 + (log_data / max_val) * 4095);
-	idx = max(1, min(4096, idx));
-
-        % Convert the indexed matrix into a truecolor RGB image
-        rgb_image = ind2rgb(idx, colorMap);
-
-        % Create output folder and save the image
-        if ~exist('output', 'dir'), mkdir('output'); end
-	imwrite(rgb_image, fullfile('output', [fileName, '.bmp']));
-
-end
