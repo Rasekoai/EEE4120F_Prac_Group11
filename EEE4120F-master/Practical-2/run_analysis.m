@@ -13,7 +13,7 @@
 %  ========================================================================
 %
 % TODO: Implement Mandelbrot set plotting and saving function
-   function mandelbrot_plot(varargin) %Add necessary input arguments
+%   function mandelbrot_plot(varargin) %Add necessary input arguments
 %  ========================================================================
 %   PART 1: Mandelbrot Set Image Plotting and Saving
 %  ========================================================================
@@ -168,7 +168,7 @@ function run_analysis()
 	    H = image_sizes(s,2);
 	    fprintf('Computing %dx%d... ', W, H);
 	    tic;
-	    iter_counts = mendelbrot_serial(W,H,max_iterations);
+	    iter_counts = mandelbrot_serial(W,H,max_iterations);
 	    execution_time_serial = toc;
 	    fprintf('Done in %.4f seconds.\n', execution_time_serial);
 	    mandelbrot_plot(iter_counts, 'hot', sprintf('mandelbrot_seq_%dx%d', W, H));
@@ -179,10 +179,10 @@ function run_analysis()
     fprintf('---Parallel version running ---\n');
     for s = 1:size(image_sizes,1)
 	    W = image_sizes(s,1);
-	    H = image_sizes,(s,2);
+	    H = image_sizes(s,2);
             fprintf('Computing %dx%d... ', W, H);
 	    tic;
-	    iter_counts = mandelbrot_parallel(W,H,max_iterations;
+	    iter_counts = mandelbrot_parallel(W,H,max_iterations);
 	    execution_time_parallel = toc;
 	    fprintf('Done in %.4f seconds.\n', execution_time_parallel);
 	    mandelbrot_plot(iter_counts, 'hot', sprintf('mandelbrot_par_%dx%d', W, H));
