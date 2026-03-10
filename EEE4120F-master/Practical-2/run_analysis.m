@@ -21,7 +21,7 @@
 
 function mandelbrot_plot(iter_counts,colorName, fileName) 
 
-        % Create color palette (4096 steps) and force the "prisoner" set to black
+        % Create color palette (4096 steps) and force the "non-escaping" set to black
         colorMap = feval(colorName, 4096); 
         colorMap(end,:) = [0,0,0]; 
 
@@ -36,9 +36,9 @@ function mandelbrot_plot(iter_counts,colorName, fileName)
         % Convert the indexed matrix into a truecolor RGB image
         rgb_image = ind2rgb(idx, colorMap); 
 
-        % Create output folder and save the image
-        if ~exist('output', 'dir'), mkdir('output'); end
-	imwrite(rgb_image, fullfile('output', [fileName, '.bmp']));
+        % create folder and save the image 
+      
+	imwrite(rgb_image, fullfile(pwd,'output', [fileName, '.png']));
 
 end
 
@@ -68,6 +68,7 @@ function [iter_counts] = mandelbrot_serial(W, H, max_iters)
     % NESTED FOR-LOOPS 
     for row = 1:H
         for col = 1:W
+
             % Define C for this specific pixel
             c_re = x_coords(col);
             c_im = y_coords(row);
@@ -76,7 +77,6 @@ function [iter_counts] = mandelbrot_serial(W, H, max_iters)
             z_re = 0;
             z_im = 0;
             
-            % Escape loop for this single point
             count = 0;
             while (count < max_iters) && (z_re^2 + z_im^2 <= 4)
                 % z = z^2 + c
@@ -114,12 +114,15 @@ function [iter_counts] = mandelbrot_parallel(W, H, max_iters)
 
     % Parallel computation - each row distributed across CPU cores
     parfor row = 1:H
-        % Local row buffer 
-        row_counts = zeros(1, W);
+        
+	x_local = x_coords;
+	c_im = y_coords(row);
+
+	% Local row buffer 
+	row_counts = zeros(1, W);
 
         for col = 1:W
-            c_re = x_coords(col);
-            c_im = y_coords(row);
+            c_re = x_local(col);
             z_re = 0;
             z_im = 0;
             count = 0;
@@ -148,6 +151,7 @@ end
 
 function run_analysis()
     %Array conatining all the image sizes to be tested
+
     image_sizes = [
         [800,600],   %SVGA
         [1280,720],  %HD
@@ -158,34 +162,91 @@ function run_analysis()
         [5120,2880], %5K
         [7680,4320]  %8K UHD
     ]
-    max_iterations = 1000; 
-    
-    % Benchmarking the serial version for all the images
+    max_iterations = 1000;
 
-    fprintf('--- Sequential version running---\n');
-    for s = 1:size(image_sizes,1)
-	    W = image_sizes(s,1);
-	    H = image_sizes(s,2);
-	    fprintf('Computing %dx%d... ', W, H);
-	    tic;
-	    iter_counts = mandelbrot_serial(W,H,max_iterations);
-	    execution_time_serial = toc;
-	    fprintf('Done in %.4f seconds.\n', execution_time_serial);
-	    mandelbrot_plot(iter_counts, 'hot', sprintf('mandelbrot_seq_%dx%d', W, H));
-	    
+    % Create output folder before anything else runs
+    if ~exist(fullfile(pwd, 'output'), 'dir')
+        mkdir(fullfile(pwd, 'output'));
     end
-% Benchmarking the parallel version for all the images
+    
+     num_sizes = size(image_sizes, 1);i
+     % Storage arrays
+    image_names   = {};
+    pixel_counts  = [];
+    time_serial   = [];
+    time_parallel = [];
+    speedup       = [];
 
-    fprintf('---Parallel version running ---\n');
-    for s = 1:size(image_sizes,1)
-	    W = image_sizes(s,1);
-	    H = image_sizes(s,2);
-            fprintf('Computing %dx%d... ', W, H);
-	    tic;
-	    iter_counts = mandelbrot_parallel(W,H,max_iterations);
-	    execution_time_parallel = toc;
-	    fprintf('Done in %.4f seconds.\n', execution_time_parallel);
-	    mandelbrot_plot(iter_counts, 'hot', sprintf('mandelbrot_par_%dx%d', W, H));
+    fprintf('--- Starting Mandelbrot Performance Test ---\n');
+
+    for s = 1:num_sizes
+        W = image_sizes(s,1);
+        H = image_sizes(s,2);
+        fprintf('\nProcessing %dx%d...\n', W, H);
+
+        %% ---- Serial Timing ----
+        tic;
+        iter_serial = mandelbrot_serial(W, H, max_iterations);
+        T_serial = toc;
+        fprintf('  Serial:   %.4f seconds\n', T_serial);
+
+        %% ---- Parallel Timing ----
+        tic;
+        iter_parallel = mandelbrot_parallel(W, H, max_iterations);
+        T_parallel = toc;
+        fprintf('  Parallel: %.4f seconds\n', T_parallel);
+
+        %% ---- Speedup ----
+        S = T_serial / T_parallel;
+        fprintf('  Speedup:  %.2fx\n', S);
+
+        %% ---- Save Images ----
+        mandelbrot_plot(iter_serial,   'hot', sprintf('mandelbrot_seq_%dx%d', W, H));
+        mandelbrot_plot(iter_parallel, 'hot', sprintf('mandelbrot_par_%dx%d', W, H));
+
+        %% ---- Visualisation ----
+        figure;
+        subplot(1,2,1);
+        imshow(iter_serial,   []);
+        title(sprintf('Serial %dx%d',   W, H), 'FontSize', 15);
+
+        subplot(1,2,2);
+        imshow(iter_parallel, []);
+        title(sprintf('Parallel %dx%d', W, H), 'FontSize', 15);
+
+        %% ---- Store Results ----
+        image_names{s}   = sprintf('%dx%d', W, H);
+        pixel_counts(s)  = W * H;
+        time_serial(s)   = T_serial;
+        time_parallel(s) = T_parallel;
+        speedup(s)        = S;
+    end
+
+    %% ---- Display Table ----
+    Results = table(image_names', pixel_counts', time_serial', time_parallel', speedup', ...
+        'VariableNames', {'Resolution', 'Pixels', 'T_Serial', 'T_Parallel', 'Speedup'});
+    disp(Results);
+
+    %% ---- Plot Timing Comparison ----
+    figure;
+    plot(pixel_counts, time_serial,   '-o', 'LineWidth', 4, 'MarkerSize', 4);
+    hold on;
+    plot(pixel_counts, time_parallel, '-o', 'LineWidth', 4, 'MarkerSize', 4);
+    xlabel('Number of Pixels',        'FontSize', 25);
+    ylabel('Execution Time (s)',       'FontSize', 25);
+    legend('Serial', 'Parallel');
+    title('Execution Time Comparison', 'FontSize', 30);
+    grid on;
+
+    %% ---- Plot Speedup ----
+    figure;
+    plot(pixel_counts, speedup, '-o', 'LineWidth', 4, 'MarkerSize', 4);
+    xlabel('Number of Pixels',                  'FontSize', 25);
+    ylabel('Speedup (T_{serial}/T_{parallel})', 'FontSize', 25);
+    title('Speedup vs Image Size',              'FontSize', 30);
+    grid on;
+
+    fprintf('\n--- All tests completed. ---\n');
 	    
 
     %TODO: For each image size, perform the following:
