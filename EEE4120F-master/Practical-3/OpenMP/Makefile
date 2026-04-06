@@ -1,7 +1,6 @@
 CC=gcc
 CFLAGS=-O3 -fopenmp -Wno-unused-result
 CFLAGS_DEBUG=-g -fopenmp -Wno-unused-result
-
 INPUT_DIR=input
 OUTPUT_DIR=output
 
@@ -12,6 +11,7 @@ PROCS=4
 INPUTS=$(wildcard $(INPUT_DIR)/energy[0-9]*)
 
 all: wariara_freights_route wariara_freights_route_debug
+	
 
 .PHONY: clean run run_debug run_all
 
@@ -27,14 +27,14 @@ wariara_freights_route_debug: wariara_freights_route.c
 # Run a single input file
 # Usage: make run INPUT=input/energy8
 run: wariara_freights_route
-	./wariara_freights_route -p $(PROCS) -i $(INPUT) -o $(OUTPUT_DIR)/$(notdir $(INPUT))_output.txt
+	./wariara_freights_route -p $(PROCS) -i $(INPUT) -o $(OUTPUT_DIR)/$(notdir $(INPUT)).txt
 
 # Run all input files energy4 through energy10
 run_all: wariara_freights_route
 	@for f in $(INPUTS); do \
 		echo "Running $$f ..."; \
-		./wariara_freights_route -p $(PROCS) -i $$f -o $(OUTPUT_DIR)/$$(basename $$f)_output.txt; \
+		./wariara_freights_route -p $(PROCS) -i $$f -o $(OUTPUT_DIR)/$$(basename $$f).txt; \
 	done
 
 run_debug: wariara_freights_route_debug
-	./wariara_freights_route_debug -p $(PROCS) -i $(INPUT) -o $(OUTPUT_DIR)/$(notdir $(INPUT))_output.txt
+	./wariara_freights_route_debug -p $(PROCS) -i $(INPUT) -o $(OUTPUT_DIR)/$(notdir $(INPUT)).txt

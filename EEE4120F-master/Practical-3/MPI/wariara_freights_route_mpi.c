@@ -35,6 +35,7 @@ int best_path[MAX_N];		//array to hold the path
 double t_comp_start;
 double t_comp_end;
 
+
 // ============================================================================
 // Timer: returns time in seconds
 // ============================================================================
@@ -70,6 +71,7 @@ int main(int argc, char **argv)
     int success_flag = 1; // 1 = good, 0 = error/help encountered
 
     // Initialize MPI
+    double t_init_start = gettime(); // begin timing the initialisation time
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
@@ -145,11 +147,9 @@ int main(int argc, char **argv)
     }
 
    
-
-  
     MPI_Bcast(&adj[0][0], MAX_N * MAX_N, MPI_INT, 0, MPI_COMM_WORLD);
 
-    
+    double t_init_end = gettime();
     printf("Process %d received adjacency matrix:\n", rank);
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
@@ -246,6 +246,8 @@ int main(int argc, char **argv)
         		fprintf(outfile, "%d ", global_best_path[i] + 1); // +1 converts 0-indexed cities to 1-indexed
     		fprintf(outfile, "\nTotal energy: %d kWh\n", global_best_cost);
     		fprintf(outfile, "T_comp: %.6f s\n", t_comp_end - t_comp_start); // elapsed computation time
+            fprintf(outfile, "T_init: %.6f s\n", t_init_end - t_init_start); // elapsed initialisation time
+            fprintf(outfile, "T_total: %.6f s\n", (t_comp_end - t_comp_start)+(t_init_end - t_init_start)); // elapsed total time
     		fclose(outfile);
 }
 

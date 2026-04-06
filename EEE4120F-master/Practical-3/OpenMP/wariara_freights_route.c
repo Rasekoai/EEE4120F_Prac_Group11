@@ -60,6 +60,7 @@ void bnb(int depth, int last, int cost_so_far, int *path, int *visited);
 
 int main(int argc, char **argv){
     
+    double t_init_start = gettime();
     int opt;
     int i, j;
     char *input_file = NULL;
@@ -146,6 +147,7 @@ int main(int argc, char **argv){
     best_cost = INT_MAX; // begin with very large cost
 
     omp_set_num_threads(procs); // set number of threads to use
+    double t_init_end = gettime(); // end the initialisation after the processes have been created
 
     double t_comp_start = gettime();	//begin computation time
     
@@ -180,7 +182,8 @@ int main(int argc, char **argv){
         fprintf(outfile, "%d ", best_path[i]+1);
     fprintf(outfile, "\nTotal energy: %d kWh\n", best_cost);
     fprintf(outfile, "T_comp: %.6f s\n", t_comp_end - t_comp_start);
-
+    fprintf(outfile, "T_init: %.6f s\n", t_init_end - t_init_start);
+    fprintf(outfile, "T_total: %.6f s\n", (t_comp_end - t_comp_start)+(t_init_end - t_init_start)); // elapsed total time
     fclose(infile);
     fclose(outfile);
 
