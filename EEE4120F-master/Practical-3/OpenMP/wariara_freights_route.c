@@ -218,6 +218,7 @@ void bnb(int depth, int last, int cost_so_far, int *path, int *visited)
     for (int next = 0; next < n; next++) {
         if (visited[next]) continue;	 // Skip cities present in the current path
         int new_cost = cost_so_far + adj[last][next];// Calculate the cost from the current city to next 
+        int local_best = best_cost; // snapshot to avoid data race
         if (new_cost >= best_cost) continue; //ignore large costs
 
         visited[next] = 1;	// mark city as visited
