@@ -1,0 +1,1 @@
+run on root: python3 plot_comparison.py

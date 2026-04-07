@@ -39,15 +39,20 @@ def load_data(base_dir):
     return data
 
 # ============================================================
-# Calculate speedup
+# Calculate speedup and efficiency
 # ============================================================
 def calc_speedup(data, inp, key):
     baseline = data[inp][1].get(key)
     speedups = []
     for p in PROCS:
         t = data[inp][p].get(key)
-        speedups.append(baseline / t if baseline and t else None)
+        speedups.append(baseline / t if baseline and t else float('nan'))
     return speedups
+
+def calc_efficiency(data, inp, key):
+    speedups = calc_speedup(data, inp, key)
+    return [s / p if s == s else float('nan')  # s == s is False for nan
+            for s, p in zip(speedups, PROCS)]
 
 # ============================================================
 # Load both datasets
@@ -58,29 +63,51 @@ print("Loading MPI data...")
 mpi_data = load_data(MPI_DIR)
 
 # ============================================================
-# Plot: 2 rows (T_comp, T_total) x 2 cols (OpenMP, MPI)
+# Plot: 4 rows x 2 cols
+#   Row 0: T_comp  Speedup    (OpenMP | MPI)
+#   Row 1: T_comp  Efficiency (OpenMP | MPI)
+#   Row 2: T_total Speedup    (OpenMP | MPI)
+#   Row 3: T_total Efficiency (OpenMP | MPI)
 # ============================================================
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle("OpenMP vs MPI Speedup Comparison (Averaged over 5 runs)", fontsize=14, fontweight="bold")
+fig, axes = plt.subplots(4, 2, figsize=(14, 20))
+fig.suptitle("OpenMP vs MPI Speedup & Efficiency Comparison (Averaged over 5 runs)",
+             fontsize=14, fontweight="bold")
 
 colors = plt.cm.tab10.colors
 
 configs = [
-    (0, 0, omp_data, "t_comp", "OpenMP — T_comp Speedup"),
-    (0, 1, mpi_data, "t_comp", "MPI — T_comp Speedup"),
-    (1, 0, omp_data, "t_total", "OpenMP — T_total Speedup"),
-    (1, 1, mpi_data, "t_total", "MPI — T_total Speedup"),
+    # (row, col, dataset, key, plot_type, title)
+    (0, 0, omp_data, "t_comp",  "speedup",    "OpenMP — T_comp Speedup"),
+    (0, 1, mpi_data, "t_comp",  "speedup",    "MPI — T_comp Speedup"),
+    (1, 0, omp_data, "t_comp",  "efficiency", "OpenMP — T_comp Efficiency"),
+    (1, 1, mpi_data, "t_comp",  "efficiency", "MPI — T_comp Efficiency"),
+    (2, 0, omp_data, "t_total", "speedup",    "OpenMP — T_total Speedup"),
+    (2, 1, mpi_data, "t_total", "speedup",    "MPI — T_total Speedup"),
+    (3, 0, omp_data, "t_total", "efficiency", "OpenMP — T_total Efficiency"),
+    (3, 1, mpi_data, "t_total", "efficiency", "MPI — T_total Efficiency"),
 ]
 
-for row, col, dataset, key, title in configs:
+for row, col, dataset, key, plot_type, title in configs:
     ax = axes[row][col]
     for i, inp in enumerate(INPUTS):
-        speedups = calc_speedup(dataset, inp, key)
-        ax.plot(PROCS, speedups, marker='o', label=inp, color=colors[i])
-    ax.plot(PROCS, PROCS, 'k--', label="Ideal", linewidth=1.2)
+        if plot_type == "speedup":
+            values = calc_speedup(dataset, inp, key)
+            marker = 'o'
+        else:
+            values = calc_efficiency(dataset, inp, key)
+            marker = 's'
+        ax.plot(PROCS, values, marker=marker, label=inp, color=colors[i])
+
+    # Ideal reference line
+    if plot_type == "speedup":
+        ax.plot(PROCS, PROCS, 'k--', label="Ideal", linewidth=1.2)
+        ax.set_ylabel("Speedup  S = T₁ / Tₚ")
+    else:
+        ax.axhline(y=1.0, color='k', linestyle='--', linewidth=1.2, label="Ideal")
+        ax.set_ylabel("Efficiency  E = S / P")
+
     ax.set_title(title)
     ax.set_xlabel("Number of Processors")
-    ax.set_ylabel("Speedup S = T₁ / Tₚ")
     ax.set_xticks(PROCS)
     ax.legend(fontsize=8)
     ax.grid(True, linestyle='--', alpha=0.5)

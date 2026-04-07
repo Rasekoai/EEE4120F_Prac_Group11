@@ -1,5 +1,5 @@
 Best path: 1 4 6 5 3 2 7 
 Total energy: 145 kWh
-T_comp: 0.005541 s
-T_init: 0.000127 s
-T_total: 0.005668 s
+T_comp: 0.001656 s
+T_init: 0.000166 s
+T_total: 0.001822 s

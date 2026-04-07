@@ -40,17 +40,6 @@ for inp in INPUTS:
         }
 
 # ============================================================
-# Print averaged values for verification
-# ============================================================
-#print(f"{'Input':<10} {'P':<5} {'T_comp (avg)':<18} {'T_total (avg)':<18}")
-#print("-" * 55)
-#for inp in INPUTS:
-#    for p in PROCS:
-#        t_comp = data[inp][p].get("t_comp")
-#        t_total = data[inp][p].get("t_total")
-#        print(f"{inp:<10} {p:<5} {t_comp:<18.6f} {t_total:<18.6f}")
-
-# ============================================================
 # Calculate Speedup: S = T(p=1) / T(p=P)
 # ============================================================
 def calc_speedup(inp, key):
@@ -61,34 +50,54 @@ def calc_speedup(inp, key):
         if baseline and t:
             speedups.append(baseline / t)
         else:
-            speedups.append(None)
+            speedups.append(float('nan'))
     return speedups
 
 # ============================================================
-# Plot
+# Calculate Efficiency: E = Speedup / P
 # ============================================================
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-fig.suptitle("MPI Speedup Analysis (Averaged over 5 runs)", fontsize=14, fontweight="bold")
+def calc_efficiency(inp, key):
+    speedups = calc_speedup(inp, key)
+    return [s / p if s == s else float('nan')  # s == s is False for nan
+            for s, p in zip(speedups, PROCS)]
 
+# ============================================================
+# Plot — 2x2 grid: top row speedup, bottom row efficiency
+# ============================================================
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+fig.suptitle("MPI Speedup & Efficiency Analysis (Averaged over 5 runs)", fontsize=14, fontweight="bold")
 
 colors = plt.cm.tab10.colors
 
-for ax, key, title in zip(axes, ["t_comp", "t_total"], ["T_comp Speedup", "T_total Speedup"]):
+for col, (key, label) in enumerate(zip(["t_comp", "t_total"], ["T_comp", "T_total"])):
+
+    # --- Speedup (top row) ---
+    ax = axes[0][col]
     for i, inp in enumerate(INPUTS):
         speedups = calc_speedup(inp, key)
         ax.plot(PROCS, speedups, marker='o', label=inp, color=colors[i])
-
-    # Ideal speedup line
     ax.plot(PROCS, PROCS, 'k--', label="Ideal", linewidth=1.2)
-
-    ax.set_title(title)
+    ax.set_title(f"{label} Speedup")
     ax.set_xlabel("Number of Processors")
-    ax.set_ylabel("Speedup S = T₁ / Tₚ")
+    ax.set_ylabel("Speedup  S = T₁ / Tₚ")
+    ax.set_xticks(PROCS)
+    ax.legend(fontsize=8)
+    ax.grid(True, linestyle='--', alpha=0.5)
+
+    # --- Efficiency (bottom row) ---
+    ax = axes[1][col]
+    for i, inp in enumerate(INPUTS):
+        efficiency = calc_efficiency(inp, key)
+        ax.plot(PROCS, efficiency, marker='s', label=inp, color=colors[i])
+    ax.axhline(y=1.0, color='k', linestyle='--', linewidth=1.2, label="Ideal")
+    ax.set_title(f"{label} Efficiency")
+    ax.set_xlabel("Number of Processors")
+    ax.set_ylabel("Efficiency  E = S / P")
     ax.set_xticks(PROCS)
     ax.legend(fontsize=8)
     ax.grid(True, linestyle='--', alpha=0.5)
 
 plt.tight_layout()
-plt.savefig("speedup_graphs.png", dpi=150)
+plt.savefig("speedup_efficiency_graphs.png", dpi=150)
 plt.show()
-print("\nSaved speedup_graphs.png")
+print("\nSaved speedup_efficiency_graphs.png")
