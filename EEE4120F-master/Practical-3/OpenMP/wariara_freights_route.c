@@ -60,7 +60,7 @@ void bnb(int depth, int last, int cost_so_far, int *path, int *visited);
 
 int main(int argc, char **argv){
     
-    double t_init_start = gettime();
+    double t_init_start = gettime();    //begin timing the initialisation
     int opt;
     int i, j;
     char *input_file = NULL;
@@ -164,7 +164,7 @@ int main(int argc, char **argv){
         memset(visited, 0, sizeof(visited));  // Zero out the visited array for this thread 
 
         path[0] = 0;	// mark city 0 as  a start 
-	visited[0] = 1;	 // mark city 0 as visited
+	    visited[0] = 1;	 // mark city 0 as visited
         path[1] = second; // add the second city to current path
         visited[second] = 1;	// mark second city as visited
 
